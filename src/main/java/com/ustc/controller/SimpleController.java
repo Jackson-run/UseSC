@@ -154,7 +154,7 @@ public class SimpleController extends HttpServlet {
         for(Map.Entry<String,String> entry : interceptorMap.entrySet()){
             entry.getKey().equals(actionname);
             for (Interceptor interceptor : interceptorList){
-                if(interceptor.getName().equals(entry.getValue())){
+                if(entry.getKey().equals(actionname.toLowerCase())&&interceptor.getName().equals(entry.getValue())){
                     try {
                         Class class_inter = Class.forName(interceptor.get_class());
                         Method method =class_inter.getDeclaredMethod(interceptor.getAfterDo(),new Class[]{Action.class,String.class,String.class});

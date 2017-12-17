@@ -20,9 +20,8 @@ public class Action2Xml {
             StringWriter writer = new StringWriter();
             marshaller.marshal(action, writer);
             File file = new File(Action2Xml.class.getResource(path).getFile());
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write(writer.toString());
-            fileWriter.flush();
+            FileWriter fileWriter = new FileWriter(file,true);
+            fileWriter.append(writer.toString());
             fileWriter.close();
             System.out.println(writer.toString());
         } catch (JAXBException e) {

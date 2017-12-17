@@ -96,7 +96,7 @@
     &ndash;&gt;-->
   <servlet>
     <servlet-name>sc</servlet-name>
-    <servlet-class>sc.ustc.controller.SimpleController</servlet-class>
+    <servlet-class>com.ustc.controller.SimpleController</servlet-class>
   </servlet>
 
   <!-- URL space mappings ============================================= -->
