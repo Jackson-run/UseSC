@@ -6,6 +6,12 @@
         <element id="directory" name="classes">
           <element id="module-output" name="UseSC" />
         </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="Maven: cglib:cglib:3.2.5" />
+          <element id="library" level="project" name="Maven: org.ow2.asm:asm:5.2" />
+          <element id="library" level="project" name="Maven: org.apache.ant:ant:1.9.6" />
+          <element id="library" level="project" name="Maven: org.apache.ant:ant-launcher:1.9.6" />
+        </element>
       </element>
       <element id="directory" name="META-INF">
         <element id="file-copy" path="$PROJECT_DIR$/target/UseSC-1.0-SNAPSHOT/META-INF/MANIFEST.MF" />

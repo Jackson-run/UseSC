@@ -1,5 +1,9 @@
 package com.ustc.controller;
 
+import water.ustc.Proxy.CglibProxy;
+import water.ustc.interceptor.Action;
+import water.ustc.interceptor.Interceptor;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -44,6 +48,7 @@ public class SimpleController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // TODO Auto-generated method stub
         request.setCharacterEncoding("UTF-8");
+        Action interceptorAction = null;
         HttpSession session = request.getSession();
         Map<String, String[]> map = request.getParameterMap();
         int a = 0;
@@ -54,18 +59,12 @@ public class SimpleController extends HttpServlet {
             // value,数组形式  
             String[] value = (String[]) element.getValue();
             System.out.print(strKey.toString() + "=");
-
             session.setAttribute("name" + a, strKey.toString());
-
             for (int i = 0; i < value.length; i++) {
                 System.out.print(value[i] + ",");
                 session.setAttribute("param" + a++, value[i]);
             }
-
-
         }
-
-
         String path = request.getServletPath();
         String actionname = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
         session.setAttribute("path", actionname);
@@ -79,12 +78,28 @@ public class SimpleController extends HttpServlet {
         List<String> xmlValueResultValue = ReadXmlFile.getXmlValueResultValue(file, actionname);
 
         List<String> xmlValueResultType = ReadXmlFile.getXmlValueResultType(file, actionname);
-
+        Map<String,String> interceptorMap = ReadXmlFile.getInterceptorMap(file);
+        List<Interceptor> interceptorList = ReadXmlFile.getInterceptor(file);
         if (!xmlValueActionName.contains(actionname)) {
             System.out.println("不可识别的action请求");
-
         }
-
+        for(Map.Entry<String,String> entry : interceptorMap.entrySet()){
+           // entry.getKey().equals(actionname);
+            for (Interceptor interceptor : interceptorList){
+               // System.out.println(interceptor.getName());
+                if(entry.getKey().equals(actionname)&&interceptor.getName().equals(entry.getValue())){
+                    try {
+                        Class class_inter = Class.forName(interceptor.get_class());
+                        Method method =class_inter.getDeclaredMethod(interceptor.getPreDo(),new Class[]{HttpServletRequest.class,HttpServletResponse.class});
+                        interceptorAction = (Action) method.invoke(class_inter.newInstance(),new Object[]{request,response});
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        String result="";
         for (int m = 0; m < xmlValueActionName.size(); m++)
 
         {
@@ -94,10 +109,9 @@ public class SimpleController extends HttpServlet {
                 Class clazz;
                 try {
                     clazz = Class.forName(xmlValueActionClass.get(m));
-
-
                     Method method = clazz.getDeclaredMethod("handle" + actionname);
-                    String result = (String) method.invoke(clazz.newInstance());
+                    CglibProxy cgl = new CglibProxy();
+                    result = (String) method.invoke(cgl.getProxy(clazz));
                     if (!xmlValueResultName.contains(result)) {
                         System.out.println("没有请求的资源");
                     } else {
@@ -132,14 +146,27 @@ public class SimpleController extends HttpServlet {
                 } catch (InvocationTargetException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
-                } catch (InstantiationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 }
 
             }
-        }
 
+        }
+        for(Map.Entry<String,String> entry : interceptorMap.entrySet()){
+            entry.getKey().equals(actionname);
+            for (Interceptor interceptor : interceptorList){
+                if(interceptor.getName().equals(entry.getValue())){
+                    try {
+                        Class class_inter = Class.forName(interceptor.get_class());
+                        Method method =class_inter.getDeclaredMethod(interceptor.getAfterDo(),new Class[]{Action.class,String.class,String.class});
+                        method.invoke(class_inter.newInstance(),new Object[]{interceptorAction,actionname,result});
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        }
 
     }
 
