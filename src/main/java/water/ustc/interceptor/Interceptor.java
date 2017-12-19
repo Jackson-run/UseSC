@@ -7,6 +7,7 @@ public class Interceptor {
     private String _class;
     private String preDo;
     private String afterDo;
+    //test
 
     public String getName() {
         return name;
